@@ -8,8 +8,9 @@ void main() {
     final Config config = new Config(
       "YOUR TENANT ID",
       "YOUR CLIENT ID",
+      "YOUR CLIENT ID",
       "openid profile offline_access");
-    final AadOAuth oauth = new AadOAuth(config);
+     final AadOAuth oauth = new AadOAuth(config);
 
     //TODO testing
     
