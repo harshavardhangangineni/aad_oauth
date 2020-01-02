@@ -52,7 +52,7 @@ class AadOAuth {
     if (!Token.tokenIsValid(_restToken) )
       await performRestAuth(config);
 
-    return _graphToken.refreshToken;
+    return _restToken.accessToken;
   }
 
   bool tokenIsValid() {
