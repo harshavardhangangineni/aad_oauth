@@ -22,6 +22,6 @@ class Config {
     this.authorizationUrl =
         "https://login.microsoftonline.com/$azureTennantId/oauth2/authorize";
     this.tokenUrl =
-        "https://login.microsoftonline.com/$azureTennantId/oauth2token";
+        "https://login.microsoftonline.com/$azureTennantId/oauth2/token";
   }
 }
