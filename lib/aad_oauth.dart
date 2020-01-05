@@ -55,10 +55,10 @@ class AadOAuth {
     return _token.accessToken;
   }
 
-  Future<String> getRestAceessToken(config) async {
+  Future<String> getRestAceessToken() async {
 
     if (!Token.tokenIsValid(_restToken) )
-      await _performRefreshAuthFlow();
+      await _performRestAccesTokenFetch();
     
     return _restToken.accessToken;
   }
