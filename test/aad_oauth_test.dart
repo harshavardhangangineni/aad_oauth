@@ -10,7 +10,7 @@ void main() {
       "YOUR CLIENT ID",
       "YOUR CLIENT ID",
       "openid profile offline_access");
-     final AadOAuth oauth = new AadOAuth(config);
+     final AadOAuth oauth = new AadOAuth(config,config);
 
     //TODO testing
     

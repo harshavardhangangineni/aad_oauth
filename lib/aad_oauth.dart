@@ -10,68 +10,78 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AadOAuth {
-  static Config _config;
+  static Config _graphConfig;
+  static Config _restConfig;
   AuthStorage _authStorage;
-  Token _graphToken;
+  Token _token;
   Token _restToken;
   RequestCode _requestCode;
   RequestToken _requestToken;
+  RequestCode _restRequestCode;
+  RequestToken _restRequestToken;
 
-  factory AadOAuth(config) {
+  factory AadOAuth(graphConfig,restConfig) {
     if ( AadOAuth._instance == null )
-      AadOAuth._instance = new AadOAuth._internal(config);
+      AadOAuth._instance = new AadOAuth._internal(graphConfig,restConfig);
     return _instance;
   }
 
   static AadOAuth _instance;
 
-  AadOAuth._internal(config){
-    AadOAuth._config = config;
+  AadOAuth._internal(graphConfig,restConfig){
+    AadOAuth._graphConfig = graphConfig;
+    AadOAuth._restConfig = restConfig;
     _authStorage = _authStorage ?? new AuthStorage();
-    _requestCode = new RequestCode(_config);
-    _requestToken = new RequestToken(_config);
+    _requestCode = new RequestCode(_graphConfig);
+    _restRequestCode = new RequestCode(_restConfig);
+    _requestToken = new RequestToken(_graphConfig);
+    _restRequestToken = new RequestToken(_restConfig);
   }
 
   void setWebViewScreenSize(Rect screenSize) {
-    _config.screenSize = screenSize;
+    _graphConfig.screenSize = screenSize;
   }
 
   Future<void> login() async {
     await _removeOldTokenOnFirstLogin();
-    if (!Token.tokenIsValid(_graphToken) )
+    if (!Token.tokenIsValid(_token) )
       await _performAuthorization();
   }
 
   Future<String> getAccessToken() async {
-    if (!Token.tokenIsValid(_graphToken) )
+    if (!Token.tokenIsValid(_token) )
       await _performAuthorization();
 
-    return _graphToken.accessToken;
+    return _token.accessToken;
   }
-    Future<String> getRestApiToken(config) async {
-    if (!Token.tokenIsValid(_restToken) )
-      await performRestAuth(config);
 
+  Future<String> getRestAceessToken(config) async {
+
+    if (!Token.tokenIsValid(_restToken) )
+      await _performRefreshAuthFlow();
+    
     return _restToken.accessToken;
   }
 
+
   bool tokenIsValid() {
-    return Token.tokenIsValid(_graphToken);
+    return Token.tokenIsValid(_token);
   }
 
   Future<void> logout() async {
     await _authStorage.clear();
     await _requestCode.clearCookies();
-    _graphToken = null;
-    AadOAuth(_config);
+    await _restRequestCode.clearCookies();
+    _token = null;
+    AadOAuth(_graphConfig,_restConfig);
   }
 
   Future<void> _performAuthorization() async {
     // load token from cache
-    _graphToken = await _authStorage.loadTokenToCache();
+    _token = await _authStorage.loadTokenToCache();
 
     //still have refreh token / try to get new access token with refresh token
-    if (_graphToken != null)
+    if (_token != null)
       await _performRefreshAuthFlow();
 
     // if we have no refresh token try to perform full request code oauth flow
@@ -84,24 +94,23 @@ class AadOAuth {
     }
 
     //save token to cache
-    await _authStorage.saveTokenToCache(_graphToken);
+    await _authStorage.saveTokenToCache(_token);
   }
 
   Future<void> _performFullAuthFlow() async {
     String code;
     try {
       code = await _requestCode.requestCode();
-      _graphToken = await _requestToken.requestToken(code);
+      _token = await _requestToken.requestToken(code);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> performRestAuth(restApiConfig) async{
-     RequestToken requestToken = new RequestToken(_config);
-     if (_graphToken.refreshToken != null) {
+   Future<void> _performRestAccesTokenFetch() async {
+    if (_token.refreshToken != null) {
       try {
-        _restToken = await requestToken.requestRefreshToken(_graphToken.refreshToken);
+        _restToken = await _restRequestToken.requestRefreshToken(_token.refreshToken);
       } catch (e) {
         //do nothing (because later we try to do a full oauth code flow request)
       }
@@ -109,9 +118,9 @@ class AadOAuth {
   }
 
   Future<void> _performRefreshAuthFlow() async {
-    if (_graphToken.refreshToken != null) {
+    if (_token.refreshToken != null) {
       try {
-        _graphToken = await _requestToken.requestRefreshToken(_graphToken.refreshToken);
+        _token = await _requestToken.requestRefreshToken(_token.refreshToken);
       } catch (e) {
         //do nothing (because later we try to do a full oauth code flow request)
       }

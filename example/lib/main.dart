@@ -37,7 +37,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static final Config config = new Config("YOUR_TENANT_ID", "YOUR CLIENT ID", "openid profile offline_access", "https://login.live.com/oauth20_desktop.srf",);
-  final AadOAuth oauth = AadOAuth(config);
+  final AadOAuth oauth = AadOAuth(config,config);
 
   Widget build(BuildContext context) {
     // adjust window size for browser login
