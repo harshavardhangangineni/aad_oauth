@@ -18,6 +18,9 @@ class TokenRefreshRequestDetails {
     if ( config.clientSecret != null )
       params.putIfAbsent("client_secret", () => config.clientSecret);
       
+    if (config.resource != null)
+      params.putIfAbsent("resource", () => config.resource);
+
     this.headers = {
       "Accept": "application/json",
       "Content-Type": config.contentType
