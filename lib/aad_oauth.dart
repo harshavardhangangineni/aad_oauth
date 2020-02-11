@@ -1,5 +1,7 @@
 library aad_oauth;
 
+import 'dart:io';
+
 import 'model/config.dart';
 import 'package:flutter/material.dart';
 import 'helper/auth_storage.dart';
@@ -20,15 +22,15 @@ class AadOAuth {
   RequestCode _restRequestCode;
   RequestToken _restRequestToken;
 
-  factory AadOAuth(graphConfig,restConfig) {
-    if ( AadOAuth._instance == null )
-      AadOAuth._instance = new AadOAuth._internal(graphConfig,restConfig);
+  factory AadOAuth(graphConfig, restConfig) {
+    if (AadOAuth._instance == null)
+      AadOAuth._instance = new AadOAuth._internal(graphConfig, restConfig);
     return _instance;
   }
 
   static AadOAuth _instance;
 
-  AadOAuth._internal(graphConfig,restConfig){
+  AadOAuth._internal(graphConfig, restConfig) {
     AadOAuth._graphConfig = graphConfig;
     AadOAuth._restConfig = restConfig;
     _authStorage = _authStorage ?? new AuthStorage();
@@ -44,25 +46,21 @@ class AadOAuth {
 
   Future<void> login() async {
     await _removeOldTokenOnFirstLogin();
-    if (!Token.tokenIsValid(_token) )
-      await _performAuthorization();
+    await _checkFreshInstall();
+    if (!Token.tokenIsValid(_token)) await _performAuthorization();
   }
 
   Future<String> getAccessToken() async {
-    if (!Token.tokenIsValid(_token) )
-      await _performAuthorization();
+    if (!Token.tokenIsValid(_token)) await _performAuthorization();
 
     return _token.accessToken;
   }
 
   Future<String> getRestAceessToken() async {
+    if (!Token.tokenIsValid(_restToken)) await _performRestAccesTokenFetch();
 
-    if (!Token.tokenIsValid(_restToken) )
-      await _performRestAccesTokenFetch();
-    
     return _restToken.accessToken;
   }
-
 
   bool tokenIsValid() {
     return Token.tokenIsValid(_token);
@@ -73,7 +71,7 @@ class AadOAuth {
     await _requestCode.clearCookies();
     await _restRequestCode.clearCookies();
     _token = null;
-    AadOAuth(_graphConfig,_restConfig);
+    AadOAuth(_graphConfig, _restConfig);
   }
 
   Future<void> _performAuthorization() async {
@@ -100,6 +98,16 @@ class AadOAuth {
   Future<void> _performFullAuthFlow() async {
     String code;
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final _keyFreshInstall = "isFreshInstall";
+      var isFreshInstall = prefs.getBool(_keyFreshInstall) ?? true;
+      if (Platform.isIOS && isFreshInstall) {
+        // Remove the code if the fresh installl issue is removed
+        final result = await Future.any([
+          _requestCode.requestCode(),
+          Future.delayed(const Duration(seconds: 8))
+        ]);
+      }
       code = await _requestCode.requestCode();
       _token = await _requestToken.requestToken(code);
     } catch (e) {
@@ -107,10 +115,11 @@ class AadOAuth {
     }
   }
 
-   Future<void> _performRestAccesTokenFetch() async {
+  Future<void> _performRestAccesTokenFetch() async {
     if (_token.refreshToken != null) {
       try {
-        _restToken = await _restRequestToken.requestRefreshToken(_token.refreshToken);
+        _restToken =
+            await _restRequestToken.requestRefreshToken(_token.refreshToken);
       } catch (e) {
         //do nothing (because later we try to do a full oauth code flow request)
       }
@@ -133,6 +142,16 @@ class AadOAuth {
     if (!prefs.getKeys().contains(_keyFreshInstall)) {
       logout();
       await prefs.setBool(_keyFreshInstall, false);
+    }
+  }
+
+  Future<void> _checkFreshInstall() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final _keyFreshInstall = "isFreshInstall";
+    if (prefs.getKeys().contains(_keyFreshInstall)) {
+      await prefs.setBool(_keyFreshInstall, false);
+    } else {
+      await prefs.setBool(_keyFreshInstall, true);
     }
   }
 }
