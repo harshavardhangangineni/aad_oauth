@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AadOAuth {
   static Config _graphConfig;
+  static Config _graphConsentsConfig;
   static Config _restConfig;
   AuthStorage _authStorage;
   Token _token;
@@ -20,24 +21,28 @@ class AadOAuth {
   RequestCode _requestCode;
   RequestToken _requestToken;
   RequestCode _restRequestCode;
+  RequestToken _graphRequestToken;
   RequestToken _restRequestToken;
 
-  factory AadOAuth(graphConfig, restConfig) {
+  factory AadOAuth(graphConfig, restConfig, graphConsentsConfig) {
     if (AadOAuth._instance == null)
-      AadOAuth._instance = new AadOAuth._internal(graphConfig, restConfig);
+      AadOAuth._instance =
+          new AadOAuth._internal(graphConfig, restConfig, graphConsentsConfig);
     return _instance;
   }
 
   static AadOAuth _instance;
 
-  AadOAuth._internal(graphConfig, restConfig) {
+  AadOAuth._internal(graphConfig, restConfig, graphConsentsConfig) {
     AadOAuth._graphConfig = graphConfig;
     AadOAuth._restConfig = restConfig;
+    AadOAuth._graphConsentsConfig = graphConsentsConfig;
     _authStorage = _authStorage ?? new AuthStorage();
     _requestCode = new RequestCode(_graphConfig);
     _restRequestCode = new RequestCode(_restConfig);
     _requestToken = new RequestToken(_graphConfig);
     _restRequestToken = new RequestToken(_restConfig);
+    _graphRequestToken = new RequestToken(_graphConsentsConfig);
   }
 
   void setWebViewScreenSize(Rect screenSize) {
@@ -62,6 +67,13 @@ class AadOAuth {
     return _restToken.accessToken;
   }
 
+  Future<String> getGraphAccessTokenWithConsents() async {
+    if (!Token.tokenIsValid(_restToken))
+      await _performAdminConsentGraphAccessTokenFetch();
+
+    return _restToken.accessToken;
+  }
+
   bool tokenIsValid() {
     return Token.tokenIsValid(_token);
   }
@@ -71,7 +83,7 @@ class AadOAuth {
     await _requestCode.clearCookies();
     await _restRequestCode.clearCookies();
     _token = null;
-    AadOAuth(_graphConfig, _restConfig);
+    AadOAuth(_graphConfig, _restConfig, _graphConsentsConfig);
   }
 
   Future<void> _performAuthorization() async {
@@ -130,6 +142,18 @@ class AadOAuth {
     if (_token.refreshToken != null) {
       try {
         _token = await _requestToken.requestRefreshToken(_token.refreshToken);
+      } catch (e) {
+        //do nothing (because later we try to do a full oauth code flow request)
+      }
+    }
+  }
+
+  Future<void> _performAdminConsentGraphAccessTokenFetch() async {
+    if (_token.refreshToken != null) {
+      try {
+        _token =
+            await _graphRequestToken.requestRefreshToken(_token.refreshToken);
+        await _performRestAccesTokenFetch();
       } catch (e) {
         //do nothing (because later we try to do a full oauth code flow request)
       }
