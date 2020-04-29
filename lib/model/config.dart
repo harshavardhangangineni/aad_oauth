@@ -17,16 +17,16 @@ class Config {
   String tokenIdentifier;
 
   Config(this.azureTenantId, this.clientId, this.scope, this.redirectUri,
-      this.azureTenantName,
       {this.clientSecret,
       this.resource,
+      this.azureTenantName,
       this.responseType = "code",
       this.contentType = "application/x-www-form-urlencoded",
       this.tokenIdentifier = "Token",
       this.screenSize}) {
     this.authorizationUrl =
-        "https://login.microsoftonline.com/$azureTennantId/oauth2/authorize";
+        "https://login.microsoftonline.com/$azureTenantId/oauth2/authorize";
     this.tokenUrl =
-        "https://login.microsoftonline.com/$azureTennantId/oauth2/token";
+        "https://login.microsoftonline.com/$azureTenantId/oauth2/token";
   }
 }

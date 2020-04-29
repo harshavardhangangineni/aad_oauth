@@ -42,9 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "YOUR_CLIENT_ID offline_access",
       "https://login.live.com/oauth20_desktop.srf",
       clientSecret: "YOUR_CLIENT_SECRET",
-      isB2C: true,
       azureTenantName: "YOUR_TENANT_NAME",
-      userFlow: "YOUR_USER_FLOW___USER_FLOW_A",
       tokenIdentifier: "UNIQUE IDENTIFIER A");
 
   static final Config configB2Cb = new Config(
@@ -53,22 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
       "YOUR_CLIENT_ID offline_access",
       "https://login.live.com/oauth20_desktop.srf",
       clientSecret: "YOUR_CLIENT_SECRET",
-      isB2C: true,
       azureTenantName: "YOUR_TENANT_NAME",
-      userFlow: "YOUR_USER_FLOW___USER_FLOW_B",
       tokenIdentifier: "UNIQUE IDENTIFIER B");
 
   //You can have as many B2C flows as you want
-
-  final AadOAuth oauthB2Ca = AadOAuth(configB2Ca);
-  final AadOAuth oauthB2Cb = AadOAuth(configB2Cb);
 
   Widget build(BuildContext context) {
     // adjust window size for browser login
     var screenSize = MediaQuery.of(context).size;
     var rectSize =
         Rect.fromLTWH(0.0, 25.0, screenSize.width, screenSize.height - 25);
-    oauthB2Ca.setWebViewScreenSize(rectSize);
+    // oauthB2Ca.setWebViewScreenSize(rectSize);
 
     return new Scaffold(
       appBar: new AppBar(
@@ -86,14 +79,14 @@ class _MyHomePageState extends State<MyHomePage> {
             leading: Icon(Icons.launch),
             title: Text('Login'),
             onTap: () {
-              login(oauthB2Ca);
+              // login(oauthB2Ca);
             },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: () {
-              logout(oauthB2Ca);
+              // logout(oauthB2Ca);
             },
           ),
           Divider(),
@@ -107,14 +100,14 @@ class _MyHomePageState extends State<MyHomePage> {
             leading: Icon(Icons.launch),
             title: Text('Login'),
             onTap: () {
-              login(oauthB2Cb);
+              // login(oauthB2Cb);
             },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: () {
-              logout(oauthB2Cb);
+              // logout(oauthB2Cb);
             },
           ),
         ],
