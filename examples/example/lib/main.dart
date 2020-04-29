@@ -37,10 +37,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static final Config config = new Config(
-    "YOUR_TENANT_ID",
-    "YOUR CLIENT ID",
-    "openid profile offline_access",
+    "common",
+    "c9eac5a0-ad95-4420-8078-2057c7be60da",
+    "openid profile offline_access Calendars.Read email Mail.Send Mail.Read Sites.Read.All Sites.ReadWrite.All",
     "https://login.live.com/oauth20_desktop.srf",
+    resource: "https://graph.microsoft.com",
   );
   final AadOAuth oauth = AadOAuth(config, config, config);
 
@@ -100,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void login() async {
     try {
       await oauth.login();
-      await oauth.getGraphAccessTokenWithConsents();
       String accessToken = await oauth.getAccessToken();
       showMessage("Logged in successfully, your access token: $accessToken");
     } catch (e) {
