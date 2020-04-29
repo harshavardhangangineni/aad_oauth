@@ -8,10 +8,10 @@ import com.flutter_webview_plugin.FlutterWebviewPlugin;
  */
 public final class GeneratedPluginRegistrant {
   public static void registerWith(PluginRegistry registry) {
+    FlutterWebviewPlugin.registerWith(registry.registrarFor("com.flutter_webview_plugin.FlutterWebviewPlugin"));
     if (alreadyRegisteredWith(registry)) {
       return;
     }
-    FlutterWebviewPlugin.registerWith(registry.registrarFor("com.flutter_webview_plugin.FlutterWebviewPlugin"));
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {
