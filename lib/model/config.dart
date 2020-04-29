@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 class Config {
-  final String azureTennantId;
+  final String azureTenantId;
+  String azureTenantName;
   String authorizationUrl;
   String tokenUrl;
   final String clientId;
@@ -11,13 +12,17 @@ class Config {
   final String contentType;
   final String scope;
   final String resource;
-  Rect screenSize;
 
-  Config(this.azureTennantId, this.clientId, this.scope, this.redirectUri,
+  Rect screenSize;
+  String tokenIdentifier;
+
+  Config(this.azureTenantId, this.clientId, this.scope, this.redirectUri,
+      this.azureTenantName,
       {this.clientSecret,
       this.resource,
       this.responseType = "code",
       this.contentType = "application/x-www-form-urlencoded",
+      this.tokenIdentifier = "Token",
       this.screenSize}) {
     this.authorizationUrl =
         "https://login.microsoftonline.com/$azureTennantId/oauth2/authorize";

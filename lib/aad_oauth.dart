@@ -37,7 +37,9 @@ class AadOAuth {
     AadOAuth._graphConfig = graphConfig;
     AadOAuth._restConfig = restConfig;
     AadOAuth._graphConsentsConfig = graphConsentsConfig;
-    _authStorage = _authStorage ?? new AuthStorage();
+    _authStorage =
+        new AuthStorage(tokenIdentifier: graphConfig.tokenIdentifier);
+    _authStorage = new AuthStorage(tokenIdentifier: restConfig.tokenIdentifier);
     _requestCode = new RequestCode(_graphConfig);
     _restRequestCode = new RequestCode(_restConfig);
     _requestToken = new RequestToken(_graphConfig);
@@ -72,6 +74,12 @@ class AadOAuth {
       await _performAdminConsentGraphAccessTokenFetch();
 
     return _restToken.accessToken;
+  }
+
+  Future<String> getIdToken() async {
+    if (!Token.tokenIsValid(_token)) await _performAuthorization();
+
+    return _token.idToken;
   }
 
   bool tokenIsValid() {
