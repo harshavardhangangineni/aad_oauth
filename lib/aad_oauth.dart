@@ -52,11 +52,13 @@ class AadOAuth {
   }
 
   Future<void> login() async {
-    try{
+    try {
       await _removeOldTokenOnFirstLogin();
-    await _checkFreshInstall();
-    if (!Token.tokenIsValid(_token)) await _performAuthorization();
-    }catch(rethrow;}
+      await _checkFreshInstall();
+      if (!Token.tokenIsValid(_token)) await _performAuthorization();
+    } catch (ex) {
+      rethrow;
+    }
   }
 
   Future<String> getAccessToken() async {
