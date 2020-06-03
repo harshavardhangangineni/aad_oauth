@@ -52,9 +52,11 @@ class AadOAuth {
   }
 
   Future<void> login() async {
-    await _removeOldTokenOnFirstLogin();
+    try{
+      await _removeOldTokenOnFirstLogin();
     await _checkFreshInstall();
     if (!Token.tokenIsValid(_token)) await _performAuthorization();
+    }catch(rethrow;}
   }
 
   Future<String> getAccessToken() async {
@@ -129,6 +131,9 @@ class AadOAuth {
         ]);
       }
       code = await _requestCode.requestCode();
+      if (code == null) {
+        throw new Exception("Access denied or authentation canceled.");
+      }        
       _token = await _requestToken.requestToken(code);
     } catch (e) {
       rethrow;
