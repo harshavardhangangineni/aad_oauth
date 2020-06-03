@@ -41,7 +41,7 @@ class RequestCode {
 
       if (uri.queryParameters["error"] != null) {
         _webView.close();
-        throw new Exception("Access denied or authentation canceled.");
+         _onCodeListener.add(null);
       }
 
       if (uri.queryParameters["code"] != null) {
