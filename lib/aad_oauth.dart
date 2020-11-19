@@ -95,6 +95,7 @@ class AadOAuth {
     await _requestCode.clearCookies();
     await _restRequestCode.clearCookies();
     _token = null;
+    _restToken = null;
     AadOAuth(_graphConfig, _restConfig, _graphConsentsConfig);
   }
 
