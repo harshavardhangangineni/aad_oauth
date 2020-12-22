@@ -11,7 +11,7 @@ class Config {
   final String responseType;
   final String contentType;
   final String scope;
-  final String resource;
+  String resource;
 
   Rect screenSize;
   String tokenIdentifier;

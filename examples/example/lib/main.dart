@@ -102,6 +102,8 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       await oauth.login();
       String accessToken = await oauth.getAccessToken();
+      await oauth.setRestResource();
+      String restToken = await oauth.getRestAceessToken();
       showMessage("Logged in successfully, your access token: $accessToken");
     } catch (e) {
       showError(e);

@@ -1,6 +1,8 @@
 library aad_oauth;
 
+import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart';
 
 import 'model/config.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +138,7 @@ class AadOAuth {
       code = await _requestCode.requestCode();
       if (code == null) {
         throw new Exception("Access denied or authentation canceled.");
-      }        
+      }
       _token = await _requestToken.requestToken(code);
     } catch (e) {
       rethrow;
@@ -193,5 +195,16 @@ class AadOAuth {
     } else {
       await prefs.setBool(_keyFreshInstall, true);
     }
+  }
+
+  setRestResource() async {
+    final response =
+        await get("https://graph.microsoft.com/v1.0/sites/root", headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${_token.accessToken}',
+    });
+    final Map<String, dynamic> responseMap = json.decode(response.body);
+    this._restRequestToken.config.resource = responseMap['webUrl'];
   }
 }
